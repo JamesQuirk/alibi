@@ -32,9 +32,10 @@ class ALiBiMultiHeadAttention(nn.Module):
         self.register_buffer("m", get_alibi_slope(self.num_heads))
         self.kqv = nn.Linear(config.d_model, 3 * config.d_model, bias=False)
         if config.causal:
-            self.register_buffer(
-                "mask", torch.tril(torch.ones(1, 1, config.max_len, config.max_len))
-            )
+            mask = torch.tril(torch.ones(1, 1, config.max_len, config.max_len))
+            if config.window is not None:
+                mask = mask - torch.tril(torch.ones_like(mask), diagonal=-(config.window + 1))
+            self.register_buffer("mask", mask)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         batch_size, seq_len, _ = x.shape
@@ -46,7 +47,7 @@ class ALiBiMultiHeadAttention(nn.Module):
         value = value.view(batch_size, seq_len, self.num_heads, -1).transpose(1, 2)
         # qv.shape == (batch_size, num_heads, seq_len, d_head)
 
-        bias = (self.m * get_relative_positions(seq_len)).unsqueeze(0)
+        bias = (self.m * get_relative_positions(seq_len).to(self.m.device)).unsqueeze(0)
         # bias.shape == (1, num_heads, seq_len, seq_len)
 
         score = torch.matmul(query, key) / self.scale + bias
