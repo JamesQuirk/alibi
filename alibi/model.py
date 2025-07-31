@@ -13,7 +13,7 @@ class ALiBiTransformer(nn.Module):
             *[ALiBiTransformerLayer(config) for _ in range(config.num_layers)]
         )
 
-    def forward(self, x: torch.tensor) -> torch.tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         _, seq_len, _ = x.shape
         assert seq_len <= self.max_len, "sequence length exceeds `max_len`"
         return self.layers(x)

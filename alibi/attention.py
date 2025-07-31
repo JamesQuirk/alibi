@@ -7,7 +7,7 @@ from torch.nn import functional as F
 from alibi.config import ALiBiConfig
 
 
-def get_relative_positions(seq_len: int) -> torch.tensor:
+def get_relative_positions(seq_len: int) -> torch.Tensor:
     x = torch.arange(seq_len)[None, :]
     y = torch.arange(seq_len)[:, None]
     return x - y
@@ -36,7 +36,7 @@ class ALiBiMultiHeadAttention(nn.Module):
                 "mask", torch.tril(torch.ones(1, 1, config.max_len, config.max_len))
             )
 
-    def forward(self, x: torch.tensor) -> torch.tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         batch_size, seq_len, _ = x.shape
 
         key, query, value = self.kqv(x).chunk(3, dim=-1)
