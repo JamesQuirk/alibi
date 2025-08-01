@@ -10,5 +10,6 @@ class ALiBiConfig:
     dropout: float = 0.1
     causal: bool = True
     expansion_factor: int = 1
+    lnorm_eps: float = 1e-6
     # `window` is the number of tokens to look back in the past
     window: int | None = None

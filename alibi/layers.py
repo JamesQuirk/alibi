@@ -14,7 +14,7 @@ class FeedForward(nn.Module):
         self.fc2 = nn.Linear(d_hidden, config.d_model)
         self.dropout = nn.Dropout(config.dropout)
 
-    def forward(self, x: torch.tensor) -> torch.tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = F.gelu(self.fc1(x))
         out = self.dropout(self.fc2(x))
         return out
@@ -23,12 +23,12 @@ class FeedForward(nn.Module):
 class ALiBiTransformerLayer(nn.Module):
     def __init__(self, config: ALiBiConfig) -> None:
         super().__init__()
-        self.ffn_norm = nn.LayerNorm(config.d_model)
-        self.attn_norm = nn.LayerNorm(config.d_model)
+        self.ffn_norm = nn.LayerNorm(config.d_model, eps=config.lnorm_eps)
+        self.attn_norm = nn.LayerNorm(config.d_model, eps=config.lnorm_eps)
         self.ffn = FeedForward(config)
         self.attn = ALiBiMultiHeadAttention(config)
 
-    def forward(self, x: torch.tensor) -> torch.tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x + self.attn(self.attn_norm(x))
         x = x + self.ffn(self.ffn_norm(x))
         return x
